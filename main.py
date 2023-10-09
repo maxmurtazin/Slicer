@@ -33,7 +33,7 @@ import numpy
 
 img=cv2.imread('greyscale_8x8.jpg')
 
-img = cv2.threshold(img, 105, 255, cv2.THRESH_BINARY)[1]
+img = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)[1]
 cv2.imwrite("black-white.jpg", img)
 
 img = Image.open("black-white.jpg")
