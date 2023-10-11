@@ -2,6 +2,7 @@
 #Import Libraries
 from PIL import Image
 import matplotlib.pyplot as plt
+from meshio import stl
 
 from scipy.ndimage import zoom
 from PIL import Image
@@ -65,3 +66,10 @@ file = open("file1.txt", "w+")
 content = str(Array)
 file.write(content)
 file.close()
+
+#  Slicing of STL file to obtain layers of the object and saving it in a text file
+
+
+
+
+
