@@ -1,8 +1,8 @@
 from printer_utilities import Slicer, OBJGeometry
 
-geometry = OBJGeometry('item.obj')
+geometry = OBJGeometry('cone.obj')
 
-slicer = Slicer(geometry, dots_per_side = 16)
+slicer = Slicer(geometry, dots_per_side = 8)
 layers = slicer.slice(thickness = 1.0)
 
 for lay in layers:
