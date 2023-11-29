@@ -15,6 +15,8 @@ import time
 
 broker = '192.168.0.168'
 port = 1883
+topic = "api/request"
+topic_sub = "api/notification/37/#"
 topic_ph = "mosquitto/printer/ph"
 topic_cond = "mosquitto/printer/cond"
 topic_curr = "mosquitto/printer/curr"
@@ -48,12 +50,20 @@ def subscribe(client: mqtt_client):
         print(f"Received `{msg.payload.decode()}`")
 
 
-    client.subscribe(topic_ph)
+
+        y = json.loads(msg.payload.decode())
+        temp = str(y["notification"]["parameters"]["temp"])
+        hum = str(y["notification"]["parameters"]["humi"])
+        print("temperature: ", temp, ", humidity:", hum)
+        temp_label.config(text=temp + " °C",
+                          fg="black")
+
+        hum_label.config(text=hum + "  %",
+                         fg="black")
+
+
+    client.subscribe(topic_sub)
     client.on_message = on_message
-
-
-
-
 
 
 window = Tk()
@@ -61,6 +71,25 @@ window.title("Slicer")
 window.geometry('1280x700')
 window.resizable(False,False)
 window.configure(bg="white")
+
+# Create Label
+temp_label = Label(window,
+                 text=" °C",
+                 bg="white",
+                 fg="black",
+                 font=("Helvetica", 16))
+
+temp_label.place(x=80,y=90)
+
+# Create Label
+hum_label = Label(window,
+                 text="  %",
+                 bg="white",
+                 fg="black",
+                 font=("Helvetica", 16))
+
+hum_label.place(x=80,y=155)
+
 
 # open file dialog
 
