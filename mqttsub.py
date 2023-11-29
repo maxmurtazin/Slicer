@@ -7,8 +7,8 @@ from paho.mqtt import client as mqtt_client
 
 broker = '192.168.0.168'
 port = 1883
-topic = "/test"
-#topic = "mosquitto/Habr/Temp"
+topic =  "mosquitto/printer/cond"
+
 # Generate a Client ID with the publish prefix.
 client_id = f'publish-{random.randint(200, 1600)}'
 username = 'mosquitto'

@@ -15,8 +15,14 @@ import time
 
 broker = '192.168.0.168'
 port = 1883
-topic = "/test"
-#topic = "mosquitto/Habr/Temp"
+topic_ph = "mosquitto/printer/ph"
+topic_cond = "mosquitto/printer/cond"
+topic_curr = "mosquitto/printer/curr"
+topic_volt = "mosquitto/printer/volt"
+
+
+
+
 # Generate a Client ID with the publish prefix.
 client_id = f'publish-{random.randint(200, 1600)}'
 username = 'mosquitto'
@@ -24,13 +30,12 @@ password = '1234'
 
 
 
-def connect_mqtt():
+def connect_mqtt() -> mqtt_client:
     def on_connect(client, userdata, flags, rc):
-        if rc==0:
-            print("Successfully connected to MQTT broker")
+        if rc == 0:
+            print("Connected to MQTT Broker!")
         else:
-            print("Failed to connect, return code %d", rc)
-
+            print("Failed to connect, return code %d\n", rc)
 
     client = mqtt_client.Client(client_id)
     client.username_pw_set(username, password)
@@ -38,37 +43,17 @@ def connect_mqtt():
     client.connect(broker, port)
     return client
 
-def publish(client,status):
-    # msg = f"messages: {msg_count}"
-    msg = "{\"action\":\"command/insert\",\"deviceId\":\""+deviceId+"\",\"command\":{\"command\":\"LED_control\",\"parameters\":{\"led\":\""+status+"\"}}}"
-    # msg = '{"action":"command/insert","command":{"id":432436060,"command":"LED_control","timestamp":"2021-03-24T00:19:44.418","lastUpdated":"2021-03-24T00:19:44.418","userId":37,"deviceId":"s3s9TFhT9WbDsA0CxlWeAKuZykjcmO6PoxK6","networkId":37,"deviceTypeId":5,"parameters":{"led":"on"},"lifetime":null,"status":null,"result":null},"subscriptionId":1616544981034531}'
-    result = client.publish(topic, msg)
-    # result: [0, 1]
-    status = result[0]
-    if status == 0:
-        print(f"Send `{msg}` to topic `{topic}`")
-    else:
-        print(f"Failed to send message to topic {topic}")
-
-
 def subscribe(client: mqtt_client):
     def on_message(client, userdata, msg):
-        #print(f"Recieved '{msg.payload.decode()}' from '{msg.topic}' topic")
-        y = json.loads(msg.payload.decode())
-        temp = str(y["notification"]["parameters"]["temp"])
-        hum = str(y["notification"]["parameters"]["humi"])
-        print("temperature: ",temp,", humidity:",hum)
-        temp_label.config(text=temp+" °C",
-                        fg="black")
-
-        hum_label.config(text=hum + "  %",
-                          fg="black")
+        print(f"Received `{msg.payload.decode()}`")
 
 
-
-
-    client.subscribe(topic_sub)
+    client.subscribe(topic_ph)
     client.on_message = on_message
+
+
+
+
 
 
 window = Tk()
@@ -318,7 +303,13 @@ timeButton = Button(window, text= "OK", pady =5, command= time)
 timeButton.place(x=550,y=300)
 
 
+client = connect_mqtt()
+subscribe(client)
+client.loop_start()
+
+
 window.mainloop()
+client.loop_stop()
 
 
 

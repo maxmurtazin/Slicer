@@ -14,6 +14,9 @@ mqtt_pic_gui -общая схема
 tk.py - графический интерфейс
 
 
-
+  "mosquitto/printer/ph" - ph
+ "mosquitto/printer/cond"); - проводимость
+ "mosquitto/printer/curr"); - ток
+ "mosquitto/printer/volt"); -напряжение
 
 
