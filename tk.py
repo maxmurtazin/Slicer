@@ -15,8 +15,10 @@ import time
 
 broker = '192.168.0.168'
 port = 1883
-topic = "api/request"
-topic_sub = "api/notification/37/#"
+
+#topic_sub = "mosquitto/printer/"
+
+
 topic_ph = "mosquitto/printer/ph"
 topic_cond = "mosquitto/printer/cond"
 topic_curr = "mosquitto/printer/curr"
@@ -46,24 +48,18 @@ def connect_mqtt() -> mqtt_client:
     return client
 
 def subscribe(client: mqtt_client):
-    def on_message(client, userdata, msg):
-        print(f"Received `{msg.payload.decode()}`")
-
-
-
+    def ph_message(client, userdata, msg):
+        print(f"Received ph  `{msg.payload.decode()}`")
         y = json.loads(msg.payload.decode())
-        temp = str(y["notification"]["parameters"]["temp"])
-        hum = str(y["notification"]["parameters"]["humi"])
-        print("temperature: ", temp, ", humidity:", hum)
-        temp_label.config(text=temp + " °C",
+
+        ph = str(json.loads(msg.payload.decode()))
+
+        ph_label.config(text=ph + "",
                           fg="black")
 
-        hum_label.config(text=hum + "  %",
-                         fg="black")
+    client.subscribe(topic_ph)
+    client.on_message = ph_message
 
-
-    client.subscribe(topic_sub)
-    client.on_message = on_message
 
 
 window = Tk()
@@ -73,22 +69,31 @@ window.resizable(False,False)
 window.configure(bg="white")
 
 # Create Label
-temp_label = Label(window,
-                 text=" °C",
+ph_label = Label(window,
+                 text= "",
                  bg="white",
                  fg="black",
                  font=("Helvetica", 16))
 
-temp_label.place(x=80,y=90)
+ph_label.place(x=80,y=90)
 
-# Create Label
-hum_label = Label(window,
-                 text="  %",
+cond_label = Label(window,
+                 text= "",
                  bg="white",
                  fg="black",
                  font=("Helvetica", 16))
 
-hum_label.place(x=80,y=155)
+cond_label.place(x=360,y=90)
+
+volt_label = Label(window,
+                 text= "",
+                 bg="white",
+                 fg="black",
+                 font=("Helvetica", 16))
+
+volt_label.place(x=460,y=90)
+
+
 
 
 # open file dialog
