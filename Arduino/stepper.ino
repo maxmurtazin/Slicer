@@ -1,6 +1,9 @@
-#include <SPI.h>
-#include <Ethernet2.h>
-
+#include <Ethernet.h>
+#include <EthernetClient.h>
+#include <Dns.h>
+#include <Dhcp.h>
+#include "Adafruit_MQTT.h"
+#include "Adafruit_MQTT_Client.h"
 const int dirPin = 7;
 const int stepPin = 6;
 
@@ -14,6 +17,11 @@ const int MV005 = 10  ;
 const int MV001 = 2 ;
 
 
+//MOVE(MV50, LOW)
+
+//MOVE(MV50, HIGH)
+
+
 // ST 1/16
 // const int MV50 = 20000 ; 
 // const int MV10 = 4000 ; 
@@ -25,10 +33,27 @@ const int MV001 = 2 ;
 
 String readString;
 int ledPin = 5;
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress ip(192, 168, 88, 177);
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xBE };
 
-EthernetServer server(80);
+/************************* Adafruit.io Setup *********************************/
+
+#define AIO_SERVER      "192.168.0.168"
+#define AIO_SERVERPORT  1883
+#define AIO_USERNAME    "mosquitto"
+#define AIO_KEY         "1234"
+
+
+/************ Global State (you don't need to change this!) ******************/
+
+//Set up the ethernet client
+EthernetClient client;
+
+Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
+
+// You don't need to change anything below this line!
+#define halt(s) { Serial.println(F( s )); while(1);  }
+
+
 void setup(){
 
   // Объявить контакты как выходы
@@ -45,25 +70,12 @@ void setup(){
    
 
 
-     Serial.begin(9600);
-  // ждём, пока не откроется монитор последовательного порта
-  // для того, чтобы отследить все события в программе
-  while (!Serial) {
+     Serial.begin(115200);
+     Ethernet.begin(mac);
+  delay(1000); //give the ethernet a second to initialize
+
   }
-  Serial.print("Serial init OK\r\n");
-  // запускаем Ethernet-соединение:
-  if (Ethernet.begin(mac) == 0) {
-    // если не удалось сконфигурировать Ethernet при помощи DHCP
-    Serial.println("Failed to configure Ethernet using DHCP");
-    // продолжать дальше смысла нет, поэтому вместо DHCP
-    // попытаемся сделать это при помощи IP-адреса:
-    Ethernet.begin(mac, ip);
-  }
-  // запускаем сервер и выводим локальный IP адрес
-  server.begin();
-  Serial.print("Server is at ");
-  Serial.println(Ethernet.localIP());
-}
+
 
 int MOVE (int heihgt, bool UPP){ //
    // Установка направления вращения двигателя по часовой стрелке.
@@ -79,191 +91,31 @@ int MOVE (int heihgt, bool UPP){ //
   }
  // delay(5000); // Ждем 
 }
-extern int *__brkval;
-int memoryFree()
-{
-int freeValue; // This will be the most recent object allocated on the stack
-if((int)__brkval == 0) // Heap is empty; use start of heap
-{
-freeValue = ((int)&freeValue) - ((int)__malloc_heap_start);
-}
-else // Heap is not empty; use last heap address
-{
-freeValue = ((int)&freeValue) - ((int)__brkval);
-}
-return freeValue;
-}
+
 
 void loop(){
+MQTT_connect();
 
-  Serial.println(memoryFree()); // print the free memory
-delay(3000);
- // MOVE(50, HIGH);
- // delay(5000);
-    // Create a client connection
-    EthernetClient client = server.available();
-    if (client) {
-        while (client.connected()) {
-            if (client.available()) {
-                char c = client.read();
-
-                //read char by char HTTP request
-                if (readString.length() < 100) {
-
-                    //store characters to string
-                    readString += c;
-                }
-
-                //if HTTP request has ended– 0x0D is Carriage Return \n ASCII
-                if (c == 0x0D) {
-                    client.println("HTTP/1.1 200 OK"); //send new page
-                    client.println("Content-Type: text/html");
-                    client.println();
-
-                    client.println("<HTML>");
-                    client.println("<HEAD>");
-                    client.println("<TITLE> ARDUINO ETHERNET SHIELD</TITLE>");
-                    client.println("</HEAD>");
-                    client.println("<BODY>");
-                    client.println("<hr>");
-                    client.println("<hr>");
-                    client.println("<br>");
-                    client.println("<H1 style=\"color:green;\">ARDUINO ETHERNET SHIELD STEPPER RULE FROM WEBPAGE</H1>");
-                    client.println("<hr>");
-                    client.println("<br>");
-
-                    client.println("<H2><a href=\"/?UP50\"\"> STEPPER UP50</a><br></H2>");
-                    client.println("<H2><a href=\"/?DOWN50\"\">STEPPER DOWN50</a><br></H2>");
-
-                    client.println("<H2><a href=\"/?UP10\"\"> STEPPER UP10</a><br></H2>");
-                    client.println("<H2><a href=\"/?DOWN10\"\">STEPPER DOWN10</a><br></H2>");
-
-                    client.println("<H2><a href=\"/?UP1\"\"> STEPPER UP1</a><br></H2>");
-                    client.println("<H2><a href=\"/?DOWN1\"\">STEPPER DOWN1</a><br></H2>");
-
-                    client.println("<H2><a href=\"/?UP01\"\"> STEPPER UP01</a><br></H2>");
-                    client.println("<H2><a href=\"/?DOWN01\"\">STEPPER DOWN01</a><br></H2>");
+}
 
 
-                    client.println("<H2><a href=\"/?UP005\"\"> STEPPER UP005</a><br></H2>");
-                    client.println("<H2><a href=\"/?DOWN005\"\">STEPPER DOWN005</a><br></H2>");
-
-                      client.println("<H2><a href=\"/?UP001\"\"> STEPPER UP001</a><br></H2>");
-                    client.println("<H2><a href=\"/?DOWN001\"\">STEPPER DOWN001</a><br></H2>");
-
-                    
-
-                    client.println("</BODY>");
-                    client.println("</HTML>");
-
-                    delay(10);
-                    //stopping client
-                    client.stop();
-
-                    // control 50
-                    if(readString.indexOf("?UP50") > -1) //checks for LEDON
-                    {
-                        MOVE(MV50, HIGH);
-                        digitalWrite(ledPin, HIGH); // set pin high
-                        //delay(7200);
-                    }
-                    else{
-                        if(readString.indexOf("?DOWN50") > -1) //checks for LEDOFF
-                        {
-                            digitalWrite(ledPin, LOW); // set pin low
-                             MOVE(MV50, LOW);//
-                        }
-                    }
-                    //clearing string for next read
-                   // readString="";
-                     // control 10
-                    if(readString.indexOf("?UP10") > -1) //checks for LEDON
-                    {
-                        MOVE(MV10, HIGH);
-                        digitalWrite(ledPin, HIGH); // set pin high
-                        //delay(7200);
-                    }
-                    else{
-                        if(readString.indexOf("?DOWN10") > -1) //checks for LEDOFF
-                        {
-                            digitalWrite(ledPin, LOW); // set pin low
-                             MOVE(MV10, LOW);//
-                        }
-                    }
-                    //clearing string for next read
-                    //readString="";
-
-                      // control 1
-                    if(readString.indexOf("?UP1") > -1) //checks for LEDON
-                    {
-                        MOVE(MV1, HIGH);
-                        digitalWrite(ledPin, HIGH); // set pin high
-                        //delay(7200);
-                    }
-                    else{
-                        if(readString.indexOf("?DOWN1") > -1) //checks for LEDOFF
-                        {
-                            digitalWrite(ledPin, LOW); // set pin low
-                             MOVE(MV1, LOW);//
-                        }
-                    }
-                    //clearing string for next read
-                   // readString="";
-
-                        // control 01
-                    if(readString.indexOf("?UP01") > -1) //checks for LEDON
-                    {
-                        MOVE(MV01, HIGH);
-                        digitalWrite(ledPin, HIGH); // set pin high
-                        //delay(7200);
-                    }
-                    else{
-                        if(readString.indexOf("?DOWN01") > -1) //checks for LEDOFF
-                        {
-                            digitalWrite(ledPin, LOW); // set pin low
-                             MOVE(MV01, LOW);//
-                        }
-                    }
-                    //clearing string for next read
-                   // readString="";
-
-                          // control 005
-                    if(readString.indexOf("?UP005") > -1) //checks for LEDON
-                    {
-                        MOVE(MV005, HIGH);
-                        digitalWrite(ledPin, HIGH); // set pin high
-                        //delay(7200);
-                    }
-                    else{
-                        if(readString.indexOf("?DOWN005") > -1) //checks for LEDOFF
-                        {
-                            digitalWrite(ledPin, LOW); // set pin low
-                             MOVE(MV005, LOW);//
-                        }
-                    }
-                    //clearing string for next read
-                   // readString="";
 
 
-                           // control 001
-                    if(readString.indexOf("?UP001") > -1) //checks for LEDON
-                    {
-                        MOVE(MV001, HIGH);
-                        digitalWrite(ledPin, HIGH); // set pin high
-                        //delay(7200);
-                    }
-                    else{
-                        if(readString.indexOf("?DOWN001") > -1) //checks for LEDOFF
-                        {
-                            digitalWrite(ledPin, LOW); // set pin low
-                             MOVE(MV001, LOW);//
-                        }
-                    }
-                    //clearing string for next read
-                    readString="";
+void MQTT_connect() {
+  int8_t ret;
 
-                }
-            }
-        }
-    }
+  // Stop if already connected.
+  if (mqtt.connected()) {
+    return;
+  }
+
+  Serial.print("Connecting to MQTT... ");
+
+  while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
+       Serial.println(mqtt.connectErrorString(ret));
+       Serial.println("Retrying MQTT connection in 5 seconds...");
+       mqtt.disconnect();
+       delay(5000);  // wait 5 seconds
+  }
+  Serial.println("MQTT Connected!");
 }
