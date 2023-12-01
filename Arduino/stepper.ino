@@ -9,10 +9,10 @@ const int stepPin = 6;
 
 //MOVE
 // ST 1/8
-const int MV50 = 10000 ; 
-const int MV10 = 2000 ; 
-const int MV1 = 200 ; 
-const int MV01 = 20 ;  
+const int MV50 = 10000 ;
+const int MV10 = 2000 ;
+const int MV1 = 200 ;
+const int MV01 = 20 ;
 const int MV005 = 10  ;
 const int MV001 = 2 ;
 
@@ -28,10 +28,10 @@ const int MV001 = 2 ;
 
 
 // ST 1/16
-// const int MV50 = 20000 ; 
-// const int MV10 = 4000 ; 
-// const int MV1 =  400; 
-// const int MV01 = 40 ;  
+// const int MV50 = 20000 ;
+// const int MV10 = 4000 ;
+// const int MV1 =  400;
+// const int MV01 = 40 ;
 // const int MV005 = 20 ;
 // const int MV001 = 4 ;
 
@@ -62,30 +62,30 @@ Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO
 
 
 
-//Adafruit_MQTT_Subscribe stepper_up = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/printer/stepper_up");
-//Adafruit_MQTT_Subscribe stepper_down = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/printer/stepper_down");
+Adafruit_MQTT_Subscribe stepper_up = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/printer/stepper_up");
+Adafruit_MQTT_Subscribe stepper_down = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/printer/stepper_down");
 
 
-Adafruit_MQTT_Subscribe STEPPER_UPP = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/printer/STEPPER_UPP");
-Adafruit_MQTT_Subscribe stepper_up = Adafruit_MQTT_Subscribe(&mqtt, STEPPER_UPP);
-Adafruit_MQTT_Subscribe STEPPER_DOWNN = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/printer/STEPPER_DOWNN");
-Adafruit_MQTT_Subscribe stepper_down = Adafruit_MQTT_Subscribe(&mqtt, STEPPER_DOWNN);
+// Adafruit_MQTT_Subscribe STEPPER_UPP = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/printer/STEPPER_UPP");
+// Adafruit_MQTT_Subscribe stepper_up = Adafruit_MQTT_Subscribe(&mqtt, STEPPER_UPP);
+// Adafruit_MQTT_Subscribe STEPPER_DOWNN = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/printer/STEPPER_DOWNN");
+// Adafruit_MQTT_Subscribe stepper_down = Adafruit_MQTT_Subscribe(&mqtt, STEPPER_DOWNN);
 
 
 void setup(){
 
   // Объявить контакты как выходы
   pinMode(stepPin, OUTPUT);
-  pinMode(dirPin, OUTPUT); 
-  
+  pinMode(dirPin, OUTPUT);
+
 
     pinMode(ledPin, OUTPUT); //pin selected to control
     // Test LED
     digitalWrite(ledPin, HIGH); // set pin high
     delay(500);
     digitalWrite(ledPin, LOW); // set pin low
-   
-   
+
+
 
 
      Serial.begin(115200);
@@ -105,7 +105,7 @@ void setup(){
 
 int MOVE_UP (int heihgt){ //
    // Установка направления вращения двигателя по часовой стрелке.
- 
+
   digitalWrite(dirPin, HIGH); // по часовой
   // Медленное вращение двигателя
   for(int x = 0; x < heihgt; x++)
@@ -115,7 +115,7 @@ int MOVE_UP (int heihgt){ //
     digitalWrite(stepPin, LOW);
     delayMicroseconds(1000);
   }
- // delay(5000); // Ждем 
+ // delay(5000); // Ждем
 }
 
 int MOVE_DOWN (int heihgt){ //
@@ -133,6 +133,26 @@ int MOVE_DOWN (int heihgt){ //
  // delay(5000); // Ждем
 }
 
+
+
+void MQTT_connect() {
+  int8_t ret;
+
+  // Stop if already connected.
+  if (mqtt.connected()) {
+    return;
+  }
+
+  Serial.print("Connecting to MQTT... ");
+
+  while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
+       Serial.println(mqtt.connectErrorString(ret));
+       Serial.println("Retrying MQTT connection in 5 seconds...");
+       mqtt.disconnect();
+       delay(5000);  // wait 5 seconds
+  }
+  Serial.println("MQTT Connected!");
+}
 
 void loop(){
 MQTT_connect();
@@ -175,25 +195,6 @@ MQTT_connect();
 
   delay(1000);
 }
-
-
-
-
-void MQTT_connect() {
-  int8_t ret;
-
-  // Stop if already connected.
-  if (mqtt.connected()) {
-    return;
-  }
-
-  Serial.print("Connecting to MQTT... ");
-
-  while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
-       Serial.println(mqtt.connectErrorString(ret));
-       Serial.println("Retrying MQTT connection in 5 seconds...");
-       mqtt.disconnect();
-       delay(5000);  // wait 5 seconds
-  }
-  Serial.println("MQTT Connected!");
 }
+
+
