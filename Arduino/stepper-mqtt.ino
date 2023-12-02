@@ -6,7 +6,7 @@
 #include "Adafruit_MQTT_Client.h"
 const int dirPin = 7;
 const int stepPin = 6;
-
+const int ledPin = 5;
 //MOVE
 // ST 1/8
 const int MV50 = 10000 ;
@@ -36,8 +36,8 @@ const int MV001 = 2 ;
 // const int MV001 = 4 ;
 
 
-String readString;
-int ledPin = 5;
+
+
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xBE };
 
 /************************* Adafruit.io Setup *********************************/
@@ -62,8 +62,8 @@ Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO
 
 
 
-Adafruit_MQTT_Subscribe stepper_up = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/printer/stepper_up");
-Adafruit_MQTT_Subscribe stepper_down = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/printer/stepper_down");
+Adafruit_MQTT_Subscribe stepper_up = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/printer/stepper_up"); // mosquitto/printer/stepper_up
+Adafruit_MQTT_Subscribe stepper_down = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/printer/stepper_down"); //// mosquitto/printer/stepper_down
 
 
 // Adafruit_MQTT_Subscribe STEPPER_UPP = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/printer/STEPPER_UPP");
@@ -81,9 +81,7 @@ void setup(){
 
     pinMode(ledPin, OUTPUT); //pin selected to control
     // Test LED
-    digitalWrite(ledPin, HIGH); // set pin high
-    delay(500);
-    digitalWrite(ledPin, LOW); // set pin low
+
 
 
 
@@ -166,12 +164,15 @@ MQTT_connect();
 
       if (strcmp((char *)stepper_down.lastread, "10") == 0) {
         MOVE_DOWN(MV10);
+        // digitalWrite(ledPin, LOW);
       }
       if (strcmp((char *)stepper_down.lastread, "1") == 0) {
         MOVE_DOWN(MV1);
+       //  digitalWrite(ledPin, LOW);
       }
       if (strcmp((char *)stepper_down.lastread, "01") == 0) {
         MOVE_DOWN(MV01);
+        // digitalWrite(ledPin, LOW);
       }
 
     }
@@ -183,12 +184,15 @@ MQTT_connect();
 
       if (strcmp((char *)stepper_up.lastread, "10") == 0) {
         MOVE_UP(MV10);
+      //  digitalWrite(ledPin, HIGH);
       }
       if (strcmp((char *)stepper_up.lastread, "1") == 0) {
         MOVE_UP(MV1);
+       // digitalWrite(ledPin, HIGH);
       }
       if (strcmp((char *)stepper_up.lastread, "01") == 0) {
         MOVE_UP(MV01);
+        // digitalWrite(ledPin, HIGH);
       }
 
     }
