@@ -18,6 +18,8 @@ port = 1883
 
 #topic_sub = "mosquitto/printer/"
 
+topic_stepper_up = "mosquitto/printer/stepper_up"
+topic_stepper_down = "mosquitto/printer/stepper_up"
 
 topic_ph = "mosquitto/printer/ph"
 topic_cond = "mosquitto/printer/cond"
@@ -46,6 +48,20 @@ def connect_mqtt() -> mqtt_client:
     client.on_connect = on_connect
     client.connect(broker, port)
     return client
+
+def publish(client,status):
+    # msg = f"messages: {msg_count}"
+    msg = "10"
+
+    result = client.publish(topic_stepper_up, msg)
+    # result: [0, 1]
+    status = result[0]
+    if status == 0:
+        print(f"Send `{msg}` to topic `{topic_stepper_up}`")
+    else:
+        print(f"Failed to send message to topic {topic_stepper_up}")
+
+
 
 def subscribe(client: mqtt_client):
     def ph_message(client, userdata, msg):
@@ -130,6 +146,7 @@ open_button.place(x=800,y=250)
 def move_up_10():
     myLabel =Label(window, text="Вверх")
     myLabel.pack()
+    publish(client, "10")
 
 def move_down_10():
     myLabel =Label(window, text="Вниз")
