@@ -455,13 +455,18 @@ MQTT_connect();
       uint16_t key_val = atoi((char *)shreg.lastread);  // convert to a number
       Key_On(key_val);
     }
+
+
+    if (subscription == &dac {
+      Serial.print(F("dac: "));
+      Serial.println((char *)dac.lastread);
+      uint16_t mV = atoi((char *)dac.lastread);  // convert to a number
+      REG_VOLT(mV);;
+    }
 }
 
-//DAC///////////////////////////////////
-REG_VOLT(mV);
-  //Serial.print(OUTPUT_VOLTAGE_DAC); 
-  Serial.println(" mV"); 
- // DAC.outputVoltage(150);
+
+
   delay(500);
 
   }
