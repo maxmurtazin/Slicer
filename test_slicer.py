@@ -30,12 +30,13 @@ def publish(client, topic):
     data = ""
     for lay in layers:
         str = lay.__str__()
-        sli = json.dumps(str.replace('\n', "$") + "$$")
-        data = data + sli
+        #sli = json.dumps(str.replace('\n', "$") + "$$")
+        data = json.dumps(str.replace('\n', "$") + "$$")
     result = client.publish(topic, data)
     msg_status = result[0]
     if msg_status == 0:
-        print(f"message : {data} sent to topic {topic}")
+        print(data.__len__())
+        #print(f"message : {data} sent to topic {topic}")
     else:
         print(f"Failed to send message to topic {topic}")
 def main():
