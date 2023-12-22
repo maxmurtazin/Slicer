@@ -10,6 +10,14 @@ client_id = f'publish-{random.randint(200, 1600)}'
 username = 'mosquitto'
 password = '1234'
 
+# broker = 'a9341bb2ff7e46d888a812eb95987858.s1.eu.hivemq.cloud'
+# port = 8883
+# topic_slice = "mosquitto/printer/slice"
+# client_id = f'publish-{random.randint(200, 1600)}'
+# username = 'mosquitto'
+# password = '1234'
+
+
 geometry = OBJGeometry('cone.obj')
 slicer = Slicer(geometry, dots_per_side = 16)
 layers = slicer.slice(thickness = 1.0)
