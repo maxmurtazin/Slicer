@@ -13,8 +13,11 @@ import json
 import random
 import time
 
-broker = '192.168.0.168'
-port = 1883
+broker = 'a9341bb2ff7e46d888a812eb95987858.s1.eu.hivemq.cloud'
+port = 8883
+
+#broker = '192.168.0.168'
+#port = 1883
 
 #topic_sub = "mosquitto/printer/"
 
